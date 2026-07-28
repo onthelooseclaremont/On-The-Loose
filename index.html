@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On The Loose — Outdoors Club of the Claremont Colleges</title>
+<meta name="description" content="On The Loose is the outdoors club of the Claremont Colleges. Trips, gear loans, leader training, and a trip guide for students at Pomona, CMC, Harvey Mudd, Pitzer, and Scripps.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper: #EDE6D3;
+    --paper-dark: #E2D9C0;
+    --ink: #2B2620;
+    --pine: #33473A;
+    --pine-light: #4A614F;
+    --rust: #B6532A;
+    --sky: #5C7C93;
+    --contour: #C9BFA0;
+    --card: #F6F1E4;
+    --shadow: rgba(43,38,32,0.25);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    line-height: 1.55;
+  }
+
+  h1,h2,h3, .display{
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    color: var(--pine);
+  }
+
+  .mono{
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  a{ color: var(--rust); }
+
+  img{ max-width: 100%; display:block; }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* --- topo contour background --- */
+  .topo-bg{
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* --- header / nav --- */
+  header{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--paper);
+    border-bottom: 2px solid var(--ink);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    text-decoration:none;
+    color: var(--ink);
+  }
+  .brand .blaze{
+    width: 16px; height: 22px;
+    background: var(--rust);
+    clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0 100%, 0 30%);
+    flex-shrink:0;
+  }
+  .brand-text{
+    font-family:'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+  }
+  nav.links{
+    display:flex;
+    gap: 26px;
+    align-items:center;
+  }
+  nav.links a{
+    text-decoration:none;
+    color: var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 2px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  nav.links a:hover{ border-color: var(--rust); color: var(--rust); }
+  .nav-toggle{ display:none; }
+
+  /* --- hero --- */
+  .hero{
+    position: relative;
+    overflow:hidden;
+    padding: 92px 24px 64px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .hero-inner{
+    position:relative;
+    z-index:2;
+    max-width: 1080px;
+    margin: 0 auto;
+    text-align:center;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--rust);
+    margin-bottom: 18px;
+  }
+  .hero h1{
+    font-size: clamp(56px, 11vw, 128px);
+    margin: 0;
+    color: var(--ink);
+  }
+  .hero-sub{
+    max-width: 560px;
+    margin: 18px auto 0;
+    font-size: 18px;
+    color: #4a443b;
+  }
+  .hero-colleges{
+    margin-top: 26px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: var(--pine-light);
+  }
+
+  /* field-note ticker */
+  .ticker{
+    margin-top: 46px;
+    border: 2px solid var(--ink);
+    background: var(--card);
+    overflow: hidden;
+    position: relative;
+    text-align:left;
+  }
+  .ticker-label{
+    position:absolute;
+    top:0; left:0;
+    background: var(--pine);
+    color: var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    z-index: 2;
+  }
+  .ticker-track{
+    padding: 30px 20px 14px 20px;
+    display:flex;
+    gap: 60px;
+    white-space: nowrap;
+    animation: scrollTicker 26s linear infinite;
+    width: max-content;
+  }
+  .ticker:hover .ticker-track{ animation-play-state: paused; }
+  .ticker-item{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+  .ticker-item b{ color: var(--rust); }
+  @keyframes scrollTicker{
+    from{ transform: translateX(0); }
+    to{ transform: translateX(-50%); }
+  }
+
+  /* --- section headers --- */
+  .section{ padding: 80px 24px; position:relative; }
+  .section-head{
+    display:flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+  }
+  .section-head .blaze-sm{
+    width:12px; height:16px;
+    background: var(--rust);
+    clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0 100%, 0 30%);
+  }
+  .section-head h2{
+    font-size: 40px;
+    margin: 0;
+  }
+  .section-head .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--sky);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-left: auto;
+  }
+
+  /* --- trip corkboard --- */
+  .corkboard{
+    background: var(--paper-dark);
+    border: 2px solid var(--ink);
+    padding: 50px 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 46px 30px;
+  }
+
+  .trip-tag{
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    padding: 20px 18px 18px;
+    position: relative;
+    box-shadow: 4px 6px 0 var(--shadow);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .trip-tag:nth-child(odd){ transform: rotate(-1.4deg); }
+  .trip-tag:nth-child(even){ transform: rotate(1.2deg); }
+  .trip-tag:hover{
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: 6px 10px 0 var(--shadow);
+  }
+  .trip-tag::before{
+    content:"";
+    position:absolute;
+    top: -9px; left: 50%;
+    transform: translateX(-50%);
+    width: 16px; height:16px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 3px var(--paper-dark);
+  }
+  .trip-diff{
+    display:flex;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .trip-diff span{
+    width: 9px; height:9px;
+    border-radius: 50%;
+    background: var(--contour);
+  }
+  .trip-diff span.on{ background: var(--rust); }
+  .trip-tag h3{
+    font-size: 26px;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .trip-meta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--pine-light);
+    margin-bottom: 10px;
+    display:flex;
+    flex-direction:column;
+    gap: 2px;
+  }
+  .trip-blurb{
+    font-size: 14.5px;
+    color: #4a443b;
+    margin: 0;
+  }
+
+  /* --- info signpost --- */
+  .signpost-row{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 22px;
+  }
+  .signpost{
+    background: var(--pine);
+    color: var(--paper);
+    padding: 26px 22px;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 78%, 88% 100%, 0 100%);
+  }
+  .signpost h3{
+    color: var(--paper);
+    font-size: 24px;
+    margin: 0 0 10px;
+  }
+  .signpost p{
+    font-size: 14px;
+    color: #E6E2D3;
+    margin: 0;
+  }
+  .signpost .arrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--rust);
+    display:block;
+    margin-bottom: 10px;
+  }
+
+  /* --- join / cta --- */
+  .cta{
+    background: var(--ink);
+    color: var(--paper);
+    text-align:center;
+    padding: 90px 24px;
+  }
+  .cta h2{
+    color: var(--paper);
+    font-size: 48px;
+    margin: 0 0 16px;
+  }
+  .cta p{
+    max-width: 480px;
+    margin: 0 auto 30px;
+    color: #C9C2AE;
+  }
+  .btn{
+    display:inline-block;
+    background: var(--rust);
+    color: var(--paper);
+    text-decoration:none;
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+    padding: 14px 28px;
+    border: 2px solid var(--paper);
+    transition: background .15s ease, color .15s ease;
+  }
+  .btn:hover{ background: var(--paper); color: var(--ink); }
+
+  /* --- footer --- */
+  footer{
+    background: var(--paper-dark);
+    border-top: 2px solid var(--ink);
+    padding: 46px 24px 30px;
+  }
+  .footer-inner{
+    max-width: 1080px;
+    margin: 0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content: space-between;
+    gap: 30px;
+  }
+  .footer-col h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--pine-light);
+    margin: 0 0 12px;
+  }
+  .footer-col a{
+    display:block;
+    color: var(--ink);
+    text-decoration:none;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .footer-col a:hover{ color: var(--rust); }
+  .footer-bottom{
+    max-width: 1080px;
+    margin: 34px auto 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--contour);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: #6b6353;
+    display:flex;
+    justify-content: space-between;
+    flex-wrap:wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 720px){
+    nav.links{ display:none; }
+    .section{ padding: 56px 18px; }
+    .corkboard{ padding: 34px 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{ animation: none; }
+    html{ scroll-behavior:auto; }
+    .trip-tag{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="blaze"></span>
+      <span class="brand-text">ON THE LOOSE</span>
+    </a>
+    <nav class="links">
+      <a href="#trips">Trips</a>
+      <a href="#gear">Gear</a>
+      <a href="#guide">Guide</a>
+      <a href="#join">Join</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <svg class="topo-bg" viewBox="0 0 1080 480" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#33473A" stroke-width="1.4">
+      <path d="M-50,60 C150,10 300,110 500,60 C700,10 900,100 1130,50" opacity="0.25"/>
+      <path d="M-50,110 C150,60 300,160 500,110 C700,60 900,150 1130,100" opacity="0.3"/>
+      <path d="M-50,170 C150,120 320,220 520,160 C720,110 900,210 1130,160" opacity="0.35"/>
+      <path d="M-50,240 C160,190 330,280 520,220 C720,170 900,270 1130,220" opacity="0.4"/>
+      <path d="M-50,320 C160,270 330,360 540,300 C740,250 900,340 1130,300" opacity="0.3"/>
+      <path d="M-50,400 C160,350 330,440 540,380 C740,330 900,420 1130,380" opacity="0.22"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <div class="eyebrow mono">Est. — Claremont, California</div>
+    <h1>ON THE<br>LOOSE</h1>
+    <p class="hero-sub">The outdoors club of the Claremont Colleges. We plan the trips, loan the gear, write the guide, and train the leaders — you bring the boots.</p>
+    <div class="hero-colleges mono">POMONA · CMC · HARVEY MUDD · PITZER · SCRIPPS</div>
+
+    <div class="ticker">
+      <span class="ticker-label mono">on deck</span>
+      <div class="ticker-track">
+        <span class="ticker-item">🏔 <b>Baldy Snow Scramble</b> — Sat, meet at Frary 7am</span>
+        <span class="ticker-item">🧗 <b>Joshua Tree Anchor Clinic</b> — Fri–Sat, beginner friendly</span>
+        <span class="ticker-item">🚵 <b>Marshall Canyon Loop</b> — Sun, bikes provided</span>
+        <span class="ticker-item">⛺ <b>Sierra Overnight — San Jacinto</b> — next weekend, 6 spots left</span>
+        <span class="ticker-item">🥾 <b>Icehouse Canyon Day Hike</b> — Sat, 8 miles round trip</span>
+        <span class="ticker-item">🏔 <b>Baldy Snow Scramble</b> — Sat, meet at Frary 7am</span>
+        <span class="ticker-item">🧗 <b>Joshua Tree Anchor Clinic</b> — Fri–Sat, beginner friendly</span>
+        <span class="ticker-item">🚵 <b>Marshall Canyon Loop</b> — Sun, bikes provided</span>
+        <span class="ticker-item">⛺ <b>Sierra Overnight — San Jacinto</b> — next weekend, 6 spots left</span>
+        <span class="ticker-item">🥾 <b>Icehouse Canyon Day Hike</b> — Sat, 8 miles round trip</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="trips">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="blaze-sm"></span>
+      <h2>Upcoming trips</h2>
+      <span class="tag mono">sign up on the sheet in Smith</span>
+    </div>
+
+    <div class="corkboard">
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span></span><span></span></div>
+        <h3>Icehouse Canyon Day Hike</h3>
+        <div class="trip-meta">
+          <span>DEST — Icehouse Canyon to the Saddle</span>
+          <span>LEADER — Caitlin G.</span>
+          <span>DATE — Sat, 8:00 AM</span>
+        </div>
+        <p class="trip-blurb">An 8-mile round trip up one of the prettiest canyons near campus. Steady climb, big payoff at the top. Snacks and layers recommended — it's cold at the saddle.</p>
+      </article>
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span class="on"></span><span></span></div>
+        <h3>Baldy Snow Scramble</h3>
+        <div class="trip-meta">
+          <span>DEST — Mt. Baldy</span>
+          <span>LEADER — Frank L.</span>
+          <span>DATE — Sat–Sun</span>
+        </div>
+        <p class="trip-blurb">Fresh snow up top after last week's storms. Microspikes provided from the gear room, but bring your own warm layers. Turnaround time is non-negotiable.</p>
+      </article>
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span class="on"></span><span class="on"></span></div>
+        <h3>Joshua Tree Anchor Clinic</h3>
+        <div class="trip-meta">
+          <span>DEST — Joshua Tree National Park</span>
+          <span>LEADER — Anna K.</span>
+          <span>DATE — Fri PM – Sat</span>
+        </div>
+        <p class="trip-blurb">Leave Friday evening, camp under a very good sky, spend Saturday building and testing anchors with the climbing staff. Open to all experience levels.</p>
+      </article>
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span></span><span></span></div>
+        <h3>Marshall Canyon Bike Loop</h3>
+        <div class="trip-meta">
+          <span>DEST — Marshall Canyon Regional Park</span>
+          <span>LEADER — Naomi F.</span>
+          <span>DATE — Sun, 9:00 AM</span>
+        </div>
+        <p class="trip-blurb">Rolling singletrack about 30 minutes from campus. We've got a few loaner bikes — first come, first served. Back in time for dinner.</p>
+      </article>
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span class="on"></span><span></span></div>
+        <h3>San Jacinto Overnight</h3>
+        <div class="trip-meta">
+          <span>DEST</span>
+          <span>LEADER — Andrew Y.</span>
+          <span>DATE — Next weekend</span>
+        </div>
+        <p class="trip-blurb">Tram up, hike in, camp near the peak, watch the sunset drop over the desert floor. Limited to eight people — sign up early.</p>
+      </article>
+
+      <article class="trip-tag">
+        <div class="trip-diff"><span class="on"></span><span></span><span></span></div>
+        <h3>Full Moon Desert Walk</h3>
+        <div class="trip-meta">
+          <span>DEST — Mojave Preserve</span>
+          <span>LEADER — Billy M.</span>
+          <span>DATE — TBD, next full moon</span>
+        </div>
+        <p class="trip-blurb">No headlamps needed — that's the whole point. A slow evening walk under a very bright moon, followed by hot chocolate at the cars.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="gear">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="blaze-sm"></span>
+      <h2>What we run</h2>
+      <span class="tag mono">free & student-run</span>
+    </div>
+    <div class="signpost-row">
+      <div class="signpost">
+        <span class="arrow mono">→ Trips</span>
+        <h3>Weekend & day trips</h3>
+        <p>Student-led hikes, climbs, rides, and overnights across the San Gabriels, the desert, and beyond — most weekends, all skill levels.</p>
+      </div>
+      <div class="signpost">
+        <span class="arrow mono">→ Gear room</span>
+        <h3>Equipment loans</h3>
+        <p>Tents, packs, stoves, and cold-weather gear, free to borrow for any registered 5C student — trip or no trip.</p>
+      </div>
+      <div class="signpost" id="guide">
+        <span class="arrow mono">→ Guide</span>
+        <h3>The OTL trip guide</h3>
+        <p>A student-written, student-updated guide to the best routes within a few hours of Claremont — where to go and what to expect.</p>
+      </div>
+      <div class="signpost">
+        <span class="arrow mono">→ Training</span>
+        <h3>Leader certification</h3>
+        <p>Want to lead your own trip? We run wilderness first aid, navigation, and leadership training every semester.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="join">
+  <h2>New to the 5Cs?</h2>
+  <p>You don't need experience, and you don't need your own gear. Come to a Wednesday meeting or just show up to a trip.</p>
+  <a class="btn" href="mailto:otlstaff@gmail.com?subject=OTL">Get in touch</a>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>On The Loose</h4>
+      <a href="#trips">Trips</a>
+      <a href="#gear">Gear room</a>
+      <a href="#guide">Trip guide</a>
+      <a href="#join">Join / contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>The Claremont Colleges</h4>
+      <a href="https://www.pomona.edu/" target="_blank" rel="noopener">Pomona College</a>
+      <a href="https://www.cmc.edu/" target="_blank" rel="noopener">Claremont McKenna</a>
+      <a href="https://www.hmc.edu/" target="_blank" rel="noopener">Harvey Mudd</a>
+      <a href="https://www.pitzer.edu/" target="_blank" rel="noopener">Pitzer College</a>
+      <a href="https://www.scrippscollege.edu/" target="_blank" rel="noopener">Scripps College</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:otlstaff@gmail.com?subject=OTL">otlstaff@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+    <span>Site rebuilt from the club's original design.</span>
+  </div>
+</footer>
+
+</body>
+</html>
