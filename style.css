@@ -356,6 +356,50 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   white-space:nowrap;
 }
 
+/* --- trip guide --- */
+.guide-intro{
+  max-width: 680px;
+  color: #4a443b;
+  margin: -20px 0 44px;
+}
+.guide-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 36px 40px;
+}
+.guide-category h3{
+  font-size: 22px;
+  margin: 0 0 4px;
+  color: var(--pine);
+}
+.guide-category .guide-count{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--sky);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display:block;
+  margin-bottom: 12px;
+}
+.guide-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+.guide-chip{
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  padding: 7px 13px;
+  font-size: 13px;
+  white-space:nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.guide-chip:hover{
+  background: var(--rust);
+  color: var(--paper);
+  border-color: var(--rust);
+}
+
 /* --- info signpost --- */
 .signpost-row{
   display:grid;
