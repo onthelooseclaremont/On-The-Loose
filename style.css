@@ -402,6 +402,46 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   border-color: var(--rust);
 }
 
+/* --- guide map --- */
+#guide-map{
+  height: 480px;
+  width: 100%;
+  border: 2px solid var(--ink);
+  filter: sepia(12%) saturate(85%) brightness(101%);
+}
+.leaflet-popup-content-wrapper{
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 3px 4px 0 var(--shadow);
+}
+.leaflet-popup-tip{ background: var(--card); border: 1.5px solid var(--ink); }
+.guide-popup{ font-family: 'Work Sans', sans-serif; }
+.guide-popup .gp-cat{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--sky);
+  letter-spacing: 0.05em;
+  display:block;
+  margin-bottom: 3px;
+}
+.guide-popup .gp-name{
+  font-family:'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--pine);
+  display:block;
+  margin-bottom: 4px;
+}
+.guide-popup a.gp-link{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  color: var(--rust);
+  text-decoration:none;
+}
+.guide-popup a.gp-link:hover{ text-decoration:underline; }
+
 /* --- guide entry pages --- */
 .entry-stats{
   display:flex;
