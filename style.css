@@ -392,6 +392,8 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   padding: 7px 13px;
   font-size: 13px;
   white-space:nowrap;
+  text-decoration:none;
+  color: var(--ink);
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 .guide-chip:hover{
@@ -399,6 +401,61 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   color: var(--paper);
   border-color: var(--rust);
 }
+
+/* --- guide entry pages --- */
+.entry-stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 16px;
+  margin: 30px 0 42px;
+}
+.entry-stat{
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  padding: 14px 20px;
+  min-width: 120px;
+}
+.entry-stat .val{
+  font-family:'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--rust);
+  line-height: 1;
+}
+.entry-stat .lab{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pine-light);
+  margin-top: 5px;
+}
+.entry-body{ max-width: 700px; }
+.entry-body p{ color:#4a443b; margin-bottom: 18px; }
+.entry-body h3{
+  font-size: 24px;
+  margin: 34px 0 12px;
+}
+.entry-callout{
+  border-left: 6px solid var(--rust);
+  background: var(--card);
+  padding: 16px 20px;
+  margin: 30px 0;
+  font-size: 14.5px;
+  color:#4a443b;
+  max-width: 700px;
+}
+.entry-callout strong{ color: var(--rust); }
+.back-link{
+  display:inline-block;
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pine-light);
+  text-decoration:none;
+  margin-bottom: 26px;
+}
+.back-link:hover{ color: var(--rust); }
 
 /* --- info signpost --- */
 .signpost-row{
