@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — On The Loose</title>
+<meta name="description" content="Admin tools for On The Loose, the outdoors club of the Claremont Colleges.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .admin-section{ margin-bottom: 56px; }
+  .admin-table{ width:100%; border-collapse: collapse; }
+  .admin-table th{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    text-transform:uppercase; letter-spacing:0.05em; color:var(--pine-light);
+    padding: 8px 10px; border-bottom: 2px solid var(--ink);
+  }
+  .admin-table td{ padding: 10px; border-bottom: 1px solid var(--paper-dark); font-size:14px; vertical-align:middle; }
+  .role-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase;
+    letter-spacing:0.04em; padding:5px 10px; border:1.5px solid var(--ink); background:var(--paper);
+    cursor:pointer; margin-right:6px;
+  }
+  .role-btn.active{ background:var(--pine); color:var(--paper); border-color:var(--pine); }
+  .role-btn.admin-active{ background:var(--rust); color:var(--paper); border-color:var(--rust); }
+  .role-btn:hover{ opacity:0.85; }
+
+  #blog-form-wrap{ border:1.5px dashed var(--pine); background:var(--card); padding:24px 24px 8px; margin-bottom: 30px; }
+  .bf-field{ margin-bottom:16px; }
+  .bf-field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--pine-light); margin-bottom:6px; }
+  .bf-field input, .bf-field textarea{ width:100%; padding:10px 12px; border:1.5px solid var(--ink); background:var(--paper); font-family:'Work Sans',sans-serif; font-size:15px; }
+  .bf-field textarea{ min-height: 200px; }
+  .bf-submit{ background:var(--rust); color:var(--paper); border:2px solid var(--ink); padding:12px 24px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.06em; font-size:13px; cursor:pointer; margin-bottom:16px; }
+  .bf-submit:hover{ background:var(--pine); }
+
+  .post-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--paper-dark); }
+  .post-row .post-title{ font-family:'Bebas Neue', sans-serif; font-size:20px; color:var(--pine); }
+  .post-row .post-meta{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--sky); }
+  .del-btn{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; border:1px solid var(--ink); background:var(--paper); padding:5px 10px; cursor:pointer; }
+  .del-btn:hover{ background:var(--rust); color:var(--paper); border-color:var(--rust); }
+
+  .gate-note{ border:1.5px dashed var(--rust); background:var(--card); padding:24px; font-size:15px; color:#4a443b; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="blaze"></span>
+      <span class="brand-text">ON THE LOOSE</span>
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past Trips</a>
+      <a href="upcoming-trips.html">Upcoming Trips</a>
+      <a href="blog.html">Blog</a>
+      <span id="auth-status"></span>
+    </nav>
+  </div>
+</header>
+
+<section class="page-banner">
+  <div class="eyebrow mono">Admin</div>
+  <h1>Admin</h1>
+  <p>Manage leader access and post to the blog.</p>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div id="gate-check"><p class="mono" style="font-size:13px; color:var(--pine-light);">Checking access…</p></div>
+    <div id="admin-content" style="display:none;">
+
+      <div class="admin-section">
+        <div class="section-head">
+          <span class="blaze-sm"></span>
+          <h2>Member roles</h2>
+          <span class="tag mono">leader / admin access</span>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+          </thead>
+          <tbody id="members-tbody">
+            <tr><td colspan="3" class="mono">Loading members…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-section">
+        <div class="section-head">
+          <span class="blaze-sm"></span>
+          <h2>Post to the blog</h2>
+        </div>
+
+        <div id="blog-form-wrap">
+          <form id="blog-form">
+            <div class="bf-field">
+              <label>Title</label>
+              <input type="text" id="blog-title" required>
+            </div>
+            <div class="bf-field">
+              <label>Post body</label>
+              <textarea id="blog-body" required placeholder="Write your post. Leave a blank line between paragraphs."></textarea>
+            </div>
+            <button class="bf-submit" type="submit">Publish post</button>
+            <p id="blog-msg" style="font-size:13px; color:var(--rust); margin-bottom:16px;"></p>
+          </form>
+        </div>
+
+        <h3 style="font-size:22px; margin-bottom:10px;">Published posts</h3>
+        <div id="posts-list"><p class="mono" style="font-size:13px; color:var(--pine-light);">Loading posts…</p></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>On The Loose</h4>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past trips</a>
+      <a href="upcoming-trips.html">Upcoming trips</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:otlstaff@gmail.com?subject=OTL">otlstaff@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
+<script>
+  let currentUser = null;
+
+  async function initAdmin() {
+    currentUser = await otlCurrentUser();
+    const isAdmin = await otlIsAdmin(currentUser);
+    const gate = document.getElementById('gate-check');
+
+    if (!isAdmin) {
+      gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Admins only.</strong> Log in with an admin account to manage roles and the blog.</div>`;
+      return;
+    }
+
+    gate.style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    loadMembers();
+    loadPosts();
+  }
+
+  async function loadMembers() {
+    const tbody = document.getElementById('members-tbody');
+    const { data: members, error } = await sb.from('profiles').select('*').order('name');
+
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="3" style="color:var(--rust);">${error.message}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = members.map(m => `
+      <tr>
+        <td>${m.name}</td>
+        <td class="mono" style="font-size:12px;">${m.email}</td>
+        <td>
+          <button class="role-btn ${m.is_leader ? 'active' : ''}" data-id="${m.id}" data-field="is_leader" data-value="${!m.is_leader}">
+            ${m.is_leader ? 'Leader ✓' : 'Make leader'}
+          </button>
+          <button class="role-btn ${m.is_admin ? 'admin-active' : ''}" data-id="${m.id}" data-field="is_admin" data-value="${!m.is_admin}">
+            ${m.is_admin ? 'Admin ✓' : 'Make admin'}
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        const field = this.dataset.field;
+        const value = this.dataset.value === 'true';
+        const update = {};
+        update[field] = value;
+        const { error } = await sb.from('profiles').update(update).eq('id', this.dataset.id);
+        if (error) { alert(error.message); return; }
+        loadMembers();
+      });
+    });
+  }
+
+  document.getElementById('blog-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const { data: profile } = await sb.from('profiles').select('name').eq('id', currentUser.id).single();
+    const authorName = (profile && profile.name) ? profile.name : currentUser.email;
+
+    const { error } = await sb.from('blog_posts').insert({
+      title: document.getElementById('blog-title').value,
+      body: document.getElementById('blog-body').value,
+      author_id: currentUser.id,
+      author_name: authorName
+    });
+
+    const msg = document.getElementById('blog-msg');
+    if (error) {
+      msg.textContent = error.message;
+    } else {
+      document.getElementById('blog-form').reset();
+      msg.textContent = '';
+      loadPosts();
+    }
+  });
+
+  async function loadPosts() {
+    const list = document.getElementById('posts-list');
+    const { data: posts, error } = await sb.from('blog_posts').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+      list.innerHTML = `<p style="color:var(--rust);">${error.message}</p>`;
+      return;
+    }
+    if (!posts || posts.length === 0) {
+      list.innerHTML = `<p class="mono" style="font-size:13px; color:var(--pine-light);">No posts yet.</p>`;
+      return;
+    }
+
+    list.innerHTML = posts.map(p => `
+      <div class="post-row">
+        <div>
+          <div class="post-title">${p.title}</div>
+          <div class="post-meta">${p.author_name} · ${new Date(p.created_at).toLocaleDateString()}</div>
+        </div>
+        <button class="del-btn" data-id="${p.id}">Delete</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        if (!confirm('Delete this post?')) return;
+        await sb.from('blog_posts').delete().eq('id', this.dataset.id);
+        loadPosts();
+      });
+    });
+  }
+
+  initAdmin();
+</script>
+
+</body>
+</html>

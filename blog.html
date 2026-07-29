@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — On The Loose</title>
+<meta name="description" content="News and posts from On The Loose, the outdoors club of the Claremont Colleges.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .post-card{
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    padding: 28px 30px;
+    margin-bottom: 30px;
+    box-shadow: 4px 6px 0 var(--shadow);
+  }
+  .post-card h2{ font-size: 32px; margin: 0 0 6px; }
+  .post-card .post-meta{
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--sky);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 18px; display:block;
+  }
+  .post-card .post-body p{ color:#4a443b; margin-bottom: 14px; }
+  .empty-note{ border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="blaze"></span>
+      <span class="brand-text">ON THE LOOSE</span>
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past Trips</a>
+      <a href="upcoming-trips.html">Upcoming Trips</a>
+      <a href="blog.html" class="active">Blog</a>
+      <span id="auth-status"></span>
+    </nav>
+  </div>
+</header>
+
+<section class="page-banner">
+  <svg class="topo-bg" viewBox="0 0 1080 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#33473A" stroke-width="1.4">
+      <path d="M-50,60 C150,10 300,110 500,60 C700,10 900,100 1130,50" opacity="0.25"/>
+      <path d="M-50,120 C160,80 330,170 540,110 C740,60 900,150 1130,110" opacity="0.3"/>
+      <path d="M-50,190 C160,150 330,240 540,180 C740,130 900,220 1130,180" opacity="0.25"/>
+    </g>
+  </svg>
+  <div class="eyebrow mono">From the club</div>
+  <h1>Blog</h1>
+  <p>Trip recaps, announcements, and whatever else OTL wants to share.</p>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div id="posts-container">
+      <p class="mono" style="font-size:13px; color:var(--pine-light);">Loading posts…</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>On The Loose</h4>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past trips</a>
+      <a href="upcoming-trips.html">Upcoming trips</a>
+    </div>
+    <div class="footer-col">
+      <h4>The Claremont Colleges</h4>
+      <a href="https://www.pomona.edu/" target="_blank" rel="noopener">Pomona College</a>
+      <a href="https://www.cmc.edu/" target="_blank" rel="noopener">Claremont McKenna</a>
+      <a href="https://www.hmc.edu/" target="_blank" rel="noopener">Harvey Mudd</a>
+      <a href="https://www.pitzer.edu/" target="_blank" rel="noopener">Pitzer College</a>
+      <a href="https://www.scrippscollege.edu/" target="_blank" rel="noopener">Scripps College</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:otlstaff@gmail.com?subject=OTL">otlstaff@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+    <span>Site rebuilt from the club's original design.</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
+<script>
+  function paragraphize(text) {
+    return text.split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+  }
+
+  async function loadBlogPosts() {
+    const container = document.getElementById('posts-container');
+    const { data: posts, error } = await sb.from('blog_posts').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+      container.innerHTML = `<p style="color:var(--rust);">Couldn't load posts: ${error.message}</p>`;
+      return;
+    }
+    if (!posts || posts.length === 0) {
+      container.innerHTML = `<div class="empty-note"><strong style="color:var(--pine);">No posts yet.</strong> Check back soon.</div>`;
+      return;
+    }
+
+    container.innerHTML = posts.map(p => `
+      <article class="post-card" id="post-${p.id}">
+        <h2>${p.title}</h2>
+        <span class="post-meta">${p.author_name} · ${new Date(p.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <div class="post-body">${paragraphize(p.body)}</div>
+      </article>
+    `).join('');
+
+    if (window.location.hash) {
+      const target = document.querySelector(window.location.hash);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  loadBlogPosts();
+</script>
+
+</body>
+</html>
