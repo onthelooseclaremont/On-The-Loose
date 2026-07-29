@@ -27,8 +27,25 @@
   .signup-btn{ margin-top:12px; width:100%; background:var(--pine); color:var(--paper); border:1.5px solid var(--ink); padding:9px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; font-size:12px; letter-spacing:0.05em; cursor:pointer; }
   .signup-btn:hover{ background:var(--rust); }
   .signup-btn:disabled{ background:#8a8272; cursor:default; }
+  .signup-btn.pending{ background:var(--sky); }
+  .signup-btn.confirmed{ background:var(--pine); }
   .signup-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--sky); margin-top:8px; display:block; }
   .empty-note{ border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b; }
+
+  .manage-toggle{ margin-top:12px; width:100%; background:transparent; color:var(--pine); border:1.5px dashed var(--pine); padding:8px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; font-size:11.5px; letter-spacing:0.05em; cursor:pointer; }
+  .manage-toggle:hover{ background:var(--paper-dark); }
+  .manage-panel{ display:none; margin-top:12px; border-top:1.5px dashed var(--contour); padding-top:12px; }
+  .manage-panel.show{ display:block; }
+  .req-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:13px; border-bottom:1px solid var(--paper-dark); }
+  .req-row:last-child{ border-bottom:none; }
+  .req-name{ flex:1; }
+  .req-status{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; padding:2px 7px; border:1px solid; }
+  .req-status.pending{ color:var(--sky); border-color:var(--sky); }
+  .req-status.confirmed{ color:var(--pine); border-color:var(--pine); }
+  .req-status.declined{ color:#8a8272; border-color:#8a8272; }
+  .req-actions{ display:flex; gap:6px; }
+  .req-actions button{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; border:1px solid var(--ink); background:var(--paper); padding:3px 8px; cursor:pointer; }
+  .req-actions button:hover{ background:var(--rust); color:var(--paper); border-color:var(--rust); }
 </style>
 </head>
 <body>
@@ -57,15 +74,15 @@
       <path d="M-50,190 C160,150 330,240 540,180 C740,130 900,220 1130,180" opacity="0.25"/>
     </g>
   </svg>
-  <div class="eyebrow mono">Live sign-ups</div>
+  <div class="eyebrow mono">Request-based sign-ups</div>
   <h1>Upcoming Trips</h1>
-  <p>Log in to post a trip or sign up for one. Difficulty is marked low to high with trail-blaze dots.</p>
+  <p>Requesting a spot doesn't guarantee it — the trip leader picks participants from everyone who requests. Difficulty is marked low to high with trail-blaze dots.</p>
 </section>
 
 <section class="section">
   <div class="wrap">
 
-    <div class="post-toggle">
+    <div class="post-toggle" id="post-toggle-wrap">
       <a href="#" class="btn" style="background:var(--pine); border-color:var(--pine);" id="post-toggle-btn">+ Post a trip</a>
     </div>
 
@@ -147,15 +164,29 @@
 <script src="supabase-config.js"></script>
 <script src="auth.js"></script>
 <script>
+  const postToggleWrap = document.getElementById('post-toggle-wrap');
   const postToggleBtn = document.getElementById('post-toggle-btn');
   const postFormWrap = document.getElementById('post-form-wrap');
 
-  postToggleBtn.addEventListener('click', async function (e) {
-    e.preventDefault();
+  async function otlIsLeader(user) {
+    if (!user) return false;
+    const { data } = await sb.from('profiles').select('is_leader').eq('id', user.id).single();
+    return !!(data && data.is_leader);
+  }
+
+  // Only leaders see the "Post a trip" button at all
+  (async function initPostButton() {
     const user = await otlCurrentUser();
-    if (!user) { window.location.href = "account.html"; return; }
-    postFormWrap.classList.toggle('show');
-  });
+    const isLeader = await otlIsLeader(user);
+    if (!isLeader) {
+      postToggleWrap.style.display = 'none';
+      return;
+    }
+    postToggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      postFormWrap.classList.toggle('show');
+    });
+  })();
 
   document.getElementById('post-form').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -195,6 +226,38 @@
     return `<div class="trip-diff">${dots}</div>`;
   }
 
+  function requestButtonHtml(trip, mySignup) {
+    if (!mySignup) {
+      return `<button class="signup-btn" data-action="request" data-trip-id="${trip.id}">Request to join</button>`;
+    }
+    if (mySignup.status === 'pending') {
+      return `<button class="signup-btn pending" data-action="cancel" data-trip-id="${trip.id}">Request pending — cancel</button>`;
+    }
+    if (mySignup.status === 'confirmed') {
+      return `<button class="signup-btn confirmed" data-action="cancel" data-trip-id="${trip.id}">You're in! — cancel spot</button>`;
+    }
+    // declined
+    return `<button class="signup-btn" disabled>Not selected this time</button>`;
+  }
+
+  function manageRequestsHtml(trip, tripSignups) {
+    if (tripSignups.length === 0) {
+      return `<p class="mono" style="font-size:12px; color:var(--pine-light);">No requests yet.</p>`;
+    }
+    const order = { pending: 0, confirmed: 1, declined: 2 };
+    const sorted = [...tripSignups].sort((a, b) => order[a.status] - order[b.status]);
+    return sorted.map(s => `
+      <div class="req-row">
+        <span class="req-name">${s.user_name}</span>
+        <span class="req-status ${s.status}">${s.status}</span>
+        <span class="req-actions">
+          ${s.status !== 'confirmed' ? `<button data-signup-id="${s.id}" data-set="confirmed">Confirm</button>` : ''}
+          ${s.status !== 'declined' ? `<button data-signup-id="${s.id}" data-set="declined">Decline</button>` : ''}
+        </span>
+      </div>
+    `).join('');
+  }
+
   async function loadTrips() {
     const container = document.getElementById('trips-container');
     const user = await otlCurrentUser();
@@ -207,7 +270,7 @@
     }
 
     if (!trips || trips.length === 0) {
-      container.innerHTML = `<div class="empty-note"><strong style="color:var(--pine);">No trips posted yet.</strong> Log in and be the first to post one.</div>`;
+      container.innerHTML = `<div class="empty-note"><strong style="color:var(--pine);">No trips posted yet.</strong> Check back soon.</div>`;
       return;
     }
 
@@ -216,9 +279,14 @@
     let html = '<div class="corkboard">';
     for (const trip of trips) {
       const tripSignups = (allSignups || []).filter(s => s.trip_id === trip.id);
-      const count = tripSignups.length;
-      const isSignedUp = user && tripSignups.some(s => s.user_id === user.id);
-      const isFull = trip.capacity && count >= trip.capacity;
+      const confirmedCount = tripSignups.filter(s => s.status === 'confirmed').length;
+      const pendingCount = tripSignups.filter(s => s.status === 'pending').length;
+      const mySignup = user ? tripSignups.find(s => s.user_id === user.id) : null;
+      const isMyTrip = user && trip.leader_id === user.id;
+
+      const countLabel = trip.capacity
+        ? `${confirmedCount} / ${trip.capacity} confirmed`
+        : `${confirmedCount} confirmed`;
 
       html += `
         <article class="trip-tag" id="trip-${trip.id}">
@@ -230,10 +298,13 @@
             <span>DATE — ${trip.trip_date}</span>
           </div>
           <p class="trip-blurb">${trip.blurb}</p>
-          <span class="signup-count">${count}${trip.capacity ? ' / ' + trip.capacity : ''} signed up</span>
-          <button class="signup-btn" data-trip-id="${trip.id}" ${isFull && !isSignedUp ? 'disabled' : ''}>
-            ${isSignedUp ? 'Cancel signup' : (isFull ? 'Trip full' : 'Sign up')}
-          </button>
+          <span class="signup-count">${countLabel}${pendingCount ? ' · ' + pendingCount + ' pending' : ''}</span>
+
+          ${isMyTrip
+            ? `<button class="manage-toggle" data-toggle-id="${trip.id}">Manage requests (${tripSignups.length})</button>
+               <div class="manage-panel" id="manage-${trip.id}">${manageRequestsHtml(trip, tripSignups)}</div>`
+            : requestButtonHtml(trip, mySignup)
+          }
         </article>
       `;
     }
@@ -249,21 +320,37 @@
       }
     }
 
-    document.querySelectorAll('.signup-btn').forEach(btn => {
+    // Request / cancel buttons (general public)
+    document.querySelectorAll('.signup-btn[data-action]').forEach(btn => {
       btn.addEventListener('click', async function () {
         const user = await otlCurrentUser();
         if (!user) { window.location.href = "account.html"; return; }
 
         const tripId = this.dataset.tripId;
-        const isCancel = this.textContent.trim() === 'Cancel signup';
+        const action = this.dataset.action;
 
-        if (isCancel) {
+        if (action === 'cancel') {
           await sb.from('signups').delete().eq('trip_id', tripId).eq('user_id', user.id);
         } else {
           const { data: profile } = await sb.from('profiles').select('name').eq('id', user.id).single();
           const userName = (profile && profile.name) ? profile.name : user.email;
-          await sb.from('signups').insert({ trip_id: tripId, user_id: user.id, user_name: userName });
+          await sb.from('signups').insert({ trip_id: tripId, user_id: user.id, user_name: userName, status: 'pending' });
         }
+        loadTrips();
+      });
+    });
+
+    // Manage-requests panel toggles (leader only, own trips)
+    document.querySelectorAll('.manage-toggle').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.getElementById('manage-' + this.dataset.toggleId).classList.toggle('show');
+      });
+    });
+
+    // Confirm / decline actions (leader only, own trips — enforced by RLS too)
+    document.querySelectorAll('.req-actions button').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        await sb.from('signups').update({ status: this.dataset.set }).eq('id', this.dataset.signupId);
         loadTrips();
       });
     });
