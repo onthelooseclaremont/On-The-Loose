@@ -9,6 +9,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  .post-toggle{ text-align:center; margin-bottom: 36px; }
+  #post-form-wrap{
+    display:none;
+    border: 1.5px dashed var(--pine);
+    background: var(--card);
+    padding: 26px 26px 10px;
+    margin-bottom: 40px;
+  }
+  #post-form-wrap.show{ display:block; }
+  .pf-row{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pf-field{ margin-bottom: 16px; }
+  .pf-field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--pine-light); margin-bottom:6px; }
+  .pf-field input, .pf-field textarea, .pf-field select{ width:100%; padding:9px 11px; border:1.5px solid var(--ink); background:var(--paper); font-family:'Work Sans',sans-serif; font-size:14.5px; }
+  .pf-field textarea{ min-height: 70px; }
+  .signup-btn{ margin-top:12px; width:100%; background:var(--pine); color:var(--paper); border:1.5px solid var(--ink); padding:9px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; font-size:12px; letter-spacing:0.05em; cursor:pointer; }
+  .signup-btn:hover{ background:var(--rust); }
+  .signup-btn:disabled{ background:#8a8272; cursor:default; }
+  .signup-count{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--sky); margin-top:8px; display:block; }
+  .empty-note{ border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b; }
+</style>
 </head>
 <body>
 
@@ -23,6 +44,7 @@
       <a href="about.html">About</a>
       <a href="past-trips.html">Past Trips</a>
       <a href="upcoming-trips.html" class="active">Upcoming Trips</a>
+      <span id="auth-status"></span>
     </nav>
   </div>
 </header>
@@ -35,51 +57,62 @@
       <path d="M-50,190 C160,150 330,240 540,180 C740,130 900,220 1130,180" opacity="0.25"/>
     </g>
   </svg>
-  <div class="eyebrow mono">Sign up on the sheet in Smith</div>
+  <div class="eyebrow mono">Live sign-ups</div>
   <h1>Upcoming Trips</h1>
-  <p>Difficulty is marked low to high with trail-blaze dots. Show up, or email the leader if you have questions.</p>
+  <p>Log in to post a trip or sign up for one. Difficulty is marked low to high with trail-blaze dots.</p>
 </section>
 
 <section class="section">
   <div class="wrap">
 
-    <!--
-      HOW TO ADD A REAL TRIP
-      1. Copy the entire <article class="trip-tag">...</article> block below (the one marked TEMPLATE).
-      2. Paste it as a new block right above or below it, inside the same <div class="corkboard">.
-      3. Replace the bracketed [placeholder] text with real info.
-      4. Difficulty dots: change <span></span> to <span class="on"></span> to fill in a dot (1 to 3 filled).
-      5. Delete the light "no trips posted yet" note box once you have at least one real trip.
-      6. Commit the change on GitHub — the live site updates automatically.
-    -->
-
-    <div style="border:1.5px dashed var(--pine); background:var(--card); padding:18px 22px; margin-bottom:36px; font-size:14px; color:#4a443b;">
-      <strong style="color:var(--pine);">No trips posted yet.</strong> The card below is a template, not a real trip — copy it to add one. See the comment in the page source for step-by-step instructions.
+    <div class="post-toggle">
+      <a href="#" class="btn" style="background:var(--pine); border-color:var(--pine);" id="post-toggle-btn">+ Post a trip</a>
     </div>
 
-    <div class="corkboard">
-
-      <!-- TEMPLATE — copy this whole <article> block to add a new trip -->
-      <article class="trip-tag">
-        <div class="trip-diff"><span></span><span></span><span></span></div>
-        <h3>[Trip Name]</h3>
-        <div class="trip-meta">
-          <span>DEST — [Destination]</span>
-          <span>LEADER — [Leader Name]</span>
-          <span>DATE — [Date / Time]</span>
+    <div id="post-form-wrap">
+      <form id="post-form">
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Trip name</label>
+            <input type="text" id="pf-title" required>
+          </div>
+          <div class="pf-field">
+            <label>Destination</label>
+            <input type="text" id="pf-destination" required>
+          </div>
         </div>
-        <p class="trip-blurb">[A sentence or two about the trip — what to expect, what to bring, and anything leaders should know before signing up.]</p>
-      </article>
-      <!-- END TEMPLATE -->
-
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Date / time</label>
+            <input type="text" id="pf-date" placeholder="e.g. Sat, 8:00 AM" required>
+          </div>
+          <div class="pf-field">
+            <label>Difficulty</label>
+            <select id="pf-difficulty">
+              <option value="1">Easy</option>
+              <option value="2">Moderate</option>
+              <option value="3">Strenuous</option>
+            </select>
+          </div>
+        </div>
+        <div class="pf-field">
+          <label>Description</label>
+          <textarea id="pf-blurb" required placeholder="What to expect, what to bring..."></textarea>
+        </div>
+        <div class="pf-field" style="max-width:160px;">
+          <label>Capacity (optional)</label>
+          <input type="number" id="pf-capacity" min="1">
+        </div>
+        <button class="signup-btn" type="submit" style="max-width:200px;">Post trip</button>
+        <p id="post-msg" style="font-size:13px; color:var(--rust); margin-top:10px;"></p>
+      </form>
     </div>
-  </div>
-</section>
 
-<section class="cta">
-  <h2>Want to lead a trip?</h2>
-  <p>Any trained leader can post one. If you're not trained yet, ask about the next leader certification session.</p>
-  <a class="btn" href="mailto:otlstaff@gmail.com?subject=Post%20a%20trip">Post a trip</a>
+    <div id="trips-container">
+      <p class="mono" style="font-size:13px; color:var(--pine-light);">Loading trips…</p>
+    </div>
+
+  </div>
 </section>
 
 <footer>
@@ -109,6 +142,126 @@
     <span>Site rebuilt from the club's original design.</span>
   </div>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
+<script>
+  const postToggleBtn = document.getElementById('post-toggle-btn');
+  const postFormWrap = document.getElementById('post-form-wrap');
+
+  postToggleBtn.addEventListener('click', async function (e) {
+    e.preventDefault();
+    const user = await otlCurrentUser();
+    if (!user) { window.location.href = "account.html"; return; }
+    postFormWrap.classList.toggle('show');
+  });
+
+  document.getElementById('post-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const user = await otlCurrentUser();
+    if (!user) { window.location.href = "account.html"; return; }
+
+    const { data: profile } = await sb.from('profiles').select('name').eq('id', user.id).single();
+    const leaderName = (profile && profile.name) ? profile.name : user.email;
+
+    const capacityVal = document.getElementById('pf-capacity').value;
+    const { error } = await sb.from('trips').insert({
+      title: document.getElementById('pf-title').value,
+      destination: document.getElementById('pf-destination').value,
+      trip_date: document.getElementById('pf-date').value,
+      difficulty: parseInt(document.getElementById('pf-difficulty').value, 10),
+      blurb: document.getElementById('pf-blurb').value,
+      capacity: capacityVal ? parseInt(capacityVal, 10) : null,
+      leader_id: user.id,
+      leader_name: leaderName
+    });
+
+    const msg = document.getElementById('post-msg');
+    if (error) {
+      msg.textContent = error.message;
+    } else {
+      document.getElementById('post-form').reset();
+      postFormWrap.classList.remove('show');
+      loadTrips();
+    }
+  });
+
+  function diffDots(level) {
+    let dots = '';
+    for (let i = 1; i <= 3; i++) {
+      dots += `<span class="${i <= level ? 'on' : ''}"></span>`;
+    }
+    return `<div class="trip-diff">${dots}</div>`;
+  }
+
+  async function loadTrips() {
+    const container = document.getElementById('trips-container');
+    const user = await otlCurrentUser();
+
+    const { data: trips, error } = await sb.from('trips').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+      container.innerHTML = `<p style="color:var(--rust);">Couldn't load trips: ${error.message}</p>`;
+      return;
+    }
+
+    if (!trips || trips.length === 0) {
+      container.innerHTML = `<div class="empty-note"><strong style="color:var(--pine);">No trips posted yet.</strong> Log in and be the first to post one.</div>`;
+      return;
+    }
+
+    const { data: allSignups } = await sb.from('signups').select('*');
+
+    let html = '<div class="corkboard">';
+    for (const trip of trips) {
+      const tripSignups = (allSignups || []).filter(s => s.trip_id === trip.id);
+      const count = tripSignups.length;
+      const isSignedUp = user && tripSignups.some(s => s.user_id === user.id);
+      const isFull = trip.capacity && count >= trip.capacity;
+
+      html += `
+        <article class="trip-tag">
+          ${diffDots(trip.difficulty)}
+          <h3>${trip.title}</h3>
+          <div class="trip-meta">
+            <span>DEST — ${trip.destination}</span>
+            <span>LEADER — ${trip.leader_name}</span>
+            <span>DATE — ${trip.trip_date}</span>
+          </div>
+          <p class="trip-blurb">${trip.blurb}</p>
+          <span class="signup-count">${count}${trip.capacity ? ' / ' + trip.capacity : ''} signed up</span>
+          <button class="signup-btn" data-trip-id="${trip.id}" ${isFull && !isSignedUp ? 'disabled' : ''}>
+            ${isSignedUp ? 'Cancel signup' : (isFull ? 'Trip full' : 'Sign up')}
+          </button>
+        </article>
+      `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+
+    document.querySelectorAll('.signup-btn').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        const user = await otlCurrentUser();
+        if (!user) { window.location.href = "account.html"; return; }
+
+        const tripId = this.dataset.tripId;
+        const isCancel = this.textContent.trim() === 'Cancel signup';
+
+        if (isCancel) {
+          await sb.from('signups').delete().eq('trip_id', tripId).eq('user_id', user.id);
+        } else {
+          const { data: profile } = await sb.from('profiles').select('name').eq('id', user.id).single();
+          const userName = (profile && profile.name) ? profile.name : user.email;
+          await sb.from('signups').insert({ trip_id: tripId, user_id: user.id, user_name: userName });
+        }
+        loadTrips();
+      });
+    });
+  }
+
+  loadTrips();
+</script>
 
 </body>
 </html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account — On The Loose</title>
+<meta name="description" content="Log in or create an account with On The Loose, the outdoors club of the Claremont Colleges.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .auth-wrap{ max-width: 420px; margin: 0 auto; }
+  .auth-tabs{ display:flex; border-bottom: 2px solid var(--ink); margin-bottom: 28px; }
+  .auth-tab{ flex:1; text-align:center; padding: 12px; font-family:'IBM Plex Mono', monospace; text-transform:uppercase; font-size:13px; letter-spacing:0.06em; cursor:pointer; color:#8a8272; }
+  .auth-tab.active{ color: var(--ink); border-bottom: 3px solid var(--rust); margin-bottom:-2px; }
+  .auth-form{ display:none; }
+  .auth-form.active{ display:block; }
+  .auth-field{ margin-bottom: 16px; }
+  .auth-field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--pine-light); margin-bottom:6px; }
+  .auth-field input{ width:100%; padding:10px 12px; border:1.5px solid var(--ink); background:var(--card); font-family:'Work Sans',sans-serif; font-size:15px; }
+  .auth-submit{ width:100%; background:var(--rust); color:var(--paper); border:2px solid var(--ink); padding:12px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.06em; font-size:13px; cursor:pointer; margin-top:6px; }
+  .auth-submit:hover{ background:var(--pine); }
+  .auth-msg{ margin-top:16px; font-size:14px; padding:12px; border-left:4px solid var(--rust); background:var(--card); display:none; }
+  .auth-msg.show{ display:block; }
+  .auth-msg.ok{ border-color: var(--pine); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="blaze"></span>
+      <span class="brand-text">ON THE LOOSE</span>
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past Trips</a>
+      <a href="upcoming-trips.html">Upcoming Trips</a>
+      <span id="auth-status"></span>
+    </nav>
+  </div>
+</header>
+
+<section class="page-banner">
+  <div class="eyebrow mono">Members</div>
+  <h1>Account</h1>
+  <p>Log in to post a trip or sign up for one. New here? Create an account below — it takes a minute.</p>
+</section>
+
+<section class="section">
+  <div class="wrap auth-wrap">
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="otlSwitchTab('login')">Log In</div>
+      <div class="auth-tab" id="tab-signup" onclick="otlSwitchTab('signup')">Sign Up</div>
+    </div>
+
+    <form class="auth-form active" id="form-login" onsubmit="return otlHandleLogin(event)">
+      <div class="auth-field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required>
+      </div>
+      <div class="auth-field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required>
+      </div>
+      <button class="auth-submit" type="submit">Log In</button>
+    </form>
+
+    <form class="auth-form" id="form-signup" onsubmit="return otlHandleSignup(event)">
+      <div class="auth-field">
+        <label for="signup-name">Name</label>
+        <input type="text" id="signup-name" required>
+      </div>
+      <div class="auth-field">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" required>
+      </div>
+      <div class="auth-field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" required minlength="6">
+      </div>
+      <button class="auth-submit" type="submit">Create Account</button>
+    </form>
+
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>On The Loose</h4>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="past-trips.html">Past trips</a>
+      <a href="upcoming-trips.html">Upcoming trips</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:otlstaff@gmail.com?subject=OTL">otlstaff@gmail.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
+<script>
+  function otlSwitchTab(which) {
+    document.getElementById('tab-login').classList.toggle('active', which === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', which === 'signup');
+    document.getElementById('form-login').classList.toggle('active', which === 'login');
+    document.getElementById('form-signup').classList.toggle('active', which === 'signup');
+    document.getElementById('auth-msg').classList.remove('show');
+  }
+
+  function otlShowMsg(text, ok) {
+    const el = document.getElementById('auth-msg');
+    el.textContent = text;
+    el.classList.add('show');
+    el.classList.toggle('ok', !!ok);
+  }
+
+  async function otlHandleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const { error } = await otlSignIn(email, password);
+    if (error) { otlShowMsg(error.message, false); return false; }
+    window.location.href = "upcoming-trips.html";
+    return false;
+  }
+
+  async function otlHandleSignup(e) {
+    e.preventDefault();
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const { error } = await otlSignUp(email, password, name);
+    if (error) { otlShowMsg(error.message, false); return false; }
+    otlShowMsg("Account created! Check your email to confirm, then log in.", true);
+    otlSwitchTab('login');
+    return false;
+  }
+</script>
+
+</body>
+</html>
