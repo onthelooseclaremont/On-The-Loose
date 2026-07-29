@@ -23,6 +23,7 @@
       <a href="about.html">About</a>
       <a href="past-trips.html">Past Trips</a>
       <a href="upcoming-trips.html">Upcoming Trips</a>
+      <a href="blog.html">Blog</a>
       <span id="auth-status"></span>
     </nav>
   </div>
@@ -90,6 +91,19 @@
     <div style="border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
       <span>See the full trip calendar, sign up, or post one of your own.</span>
       <a class="btn" style="background:var(--pine); border-color:var(--pine); padding:10px 20px;" href="upcoming-trips.html">View upcoming trips →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="blaze-sm"></span>
+      <h2>From the blog</h2>
+      <span class="tag mono"><a href="blog.html">see all posts →</a></span>
+    </div>
+    <div id="featured-post">
+      <p class="mono" style="font-size:13px; color:var(--pine-light);">Loading…</p>
     </div>
   </div>
 </section>
@@ -165,6 +179,30 @@
   }
 
   otlLoadTicker();
+
+  async function otlLoadFeaturedPost() {
+    const el = document.getElementById('featured-post');
+    const { data: posts, error } = await sb.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(1);
+
+    if (error || !posts || posts.length === 0) {
+      el.innerHTML = `<div style="border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b;">No posts yet — check back soon.</div>`;
+      return;
+    }
+
+    const p = posts[0];
+    const snippet = p.body.length > 220 ? p.body.slice(0, 220).trim() + '…' : p.body;
+
+    el.innerHTML = `
+      <div class="featured-post-card">
+        <h3>${p.title}</h3>
+        <span class="fp-meta">${p.author_name} · ${new Date(p.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <p class="fp-snippet">${snippet}</p>
+        <a class="fp-link" href="blog.html#post-${p.id}">Read the full post →</a>
+      </div>
+    `;
+  }
+
+  otlLoadFeaturedPost();
 </script>
 </body>
 </html>
