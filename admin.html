@@ -146,19 +146,24 @@
   let currentUser = null;
 
   async function initAdmin() {
-    currentUser = await otlCurrentUser();
-    const isAdmin = await otlIsAdmin(currentUser);
     const gate = document.getElementById('gate-check');
+    try {
+      currentUser = await otlCurrentUser();
+      const isAdmin = await otlIsAdmin(currentUser);
 
-    if (!isAdmin) {
-      gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Staff only.</strong> Log in with an admin account to manage roles and the blog.</div>`;
-      return;
+      if (!isAdmin) {
+        gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Staff only.</strong> ${currentUser ? "This account isn't marked as an admin." : 'Log in with an admin account to continue.'}</div>`;
+        return;
+      }
+
+      gate.style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      loadMembers();
+      loadPosts();
+    } catch (err) {
+      console.error(err);
+      gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Something went wrong:</strong> ${err.message || err}</div>`;
     }
-
-    gate.style.display = 'none';
-    document.getElementById('admin-content').style.display = 'block';
-    loadMembers();
-    loadPosts();
   }
 
   async function loadMembers() {
