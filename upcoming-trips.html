@@ -210,7 +210,11 @@
 
     const msg = document.getElementById('post-msg');
     if (error) {
-      msg.textContent = error.message;
+      if (error.message && error.message.toLowerCase().includes('row-level security')) {
+        msg.textContent = "You Must Be A Confirmed OTL Leader To Post Trips";
+      } else {
+        msg.textContent = error.message;
+      }
     } else {
       document.getElementById('post-form').reset();
       postFormWrap.classList.remove('show');
