@@ -142,17 +142,17 @@
       return;
     }
 
-    const { data: allSignups } = await sb.from('signups').select('trip_id');
+    const { data: allSignups } = await sb.from('signups').select('trip_id, status');
 
     function itemsHtml() {
       return trips.map(function (trip) {
-        const count = (allSignups || []).filter(function (s) { return s.trip_id === trip.id; }).length;
+        const confirmed = (allSignups || []).filter(function (s) { return s.trip_id === trip.id && s.status === 'confirmed'; }).length;
         let spots = '';
         if (trip.capacity) {
-          const left = trip.capacity - count;
+          const left = trip.capacity - confirmed;
           spots = left > 0 ? (left + ' spot' + (left === 1 ? '' : 's') + ' left') : 'full';
         } else {
-          spots = count + ' signed up';
+          spots = confirmed + ' confirmed';
         }
         return '<a class="ticker-item" href="upcoming-trips.html#trip-' + trip.id + '">'
           + '<b>' + trip.title + '</b> — ' + trip.trip_date + ' · ' + spots
