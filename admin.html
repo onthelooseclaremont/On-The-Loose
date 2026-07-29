@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — On The Loose</title>
-<meta name="description" content="Admin tools for On The Loose, the outdoors club of the Claremont Colleges.">
+<title>Staff — On The Loose</title>
+<meta name="description" content="Staff tools for On The Loose, the outdoors club of the Claremont Colleges.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -64,8 +64,8 @@
 </header>
 
 <section class="page-banner">
-  <div class="eyebrow mono">Admin</div>
-  <h1>Admin</h1>
+  <div class="eyebrow mono">Staff</div>
+  <h1>Staff</h1>
   <p>Manage leader access and post to the blog.</p>
 </section>
 
@@ -135,6 +135,7 @@
   </div>
   <div class="footer-bottom">
     <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+    <a href="admin.html" class="mono" style="color:#6b6353; text-decoration:none;">Staff</a>
   </div>
 </footer>
 
@@ -150,7 +151,7 @@
     const gate = document.getElementById('gate-check');
 
     if (!isAdmin) {
-      gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Admins only.</strong> Log in with an admin account to manage roles and the blog.</div>`;
+      gate.innerHTML = `<div class="gate-note"><strong style="color:var(--rust);">Staff only.</strong> Log in with an admin account to manage roles and the blog.</div>`;
       return;
     }
 
