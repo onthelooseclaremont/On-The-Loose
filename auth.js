@@ -8,6 +8,18 @@ async function otlCurrentUser() {
   return session ? session.user : null;
 }
 
+async function otlIsLeader(user) {
+  if (!user) return false;
+  const { data } = await sb.from("profiles").select("is_leader").eq("id", user.id).single();
+  return !!(data && data.is_leader);
+}
+
+async function otlIsAdmin(user) {
+  if (!user) return false;
+  const { data } = await sb.from("profiles").select("is_admin").eq("id", user.id).single();
+  return !!(data && data.is_admin);
+}
+
 async function otlSignUp(email, password, name) {
   const { data, error } = await sb.auth.signUp({
     email, password,
