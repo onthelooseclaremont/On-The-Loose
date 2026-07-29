@@ -221,7 +221,7 @@
       const isFull = trip.capacity && count >= trip.capacity;
 
       html += `
-        <article class="trip-tag">
+        <article class="trip-tag" id="trip-${trip.id}">
           ${diffDots(trip.difficulty)}
           <h3>${trip.title}</h3>
           <div class="trip-meta">
@@ -239,6 +239,15 @@
     }
     html += '</div>';
     container.innerHTML = html;
+
+    if (window.location.hash) {
+      const target = document.querySelector(window.location.hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.outline = '3px solid var(--rust)';
+        setTimeout(function () { target.style.outline = 'none'; }, 2000);
+      }
+    }
 
     document.querySelectorAll('.signup-btn').forEach(btn => {
       btn.addEventListener('click', async function () {

@@ -202,7 +202,9 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   font-family:'IBM Plex Mono', monospace;
   font-size: 13.5px;
   color: var(--ink);
+  text-decoration: none;
 }
+.ticker-item:hover{ color: var(--rust); text-decoration: underline; }
 .ticker-item b{ color: var(--rust); }
 @keyframes scrollTicker{
   from{ transform: translateX(0); }

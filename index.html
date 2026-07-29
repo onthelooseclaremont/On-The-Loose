@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>On The Loose — Outdoors Club of the Claremont Colleges</title>
-<meta name="description" content="On The Loose is the outdoors club of the Claremont Colleges. Trips, gear loans, leader training, and a trip guide for students at Pomona, CMC, Harvey Mudd, Pitzer, and Scripps.">
+<meta name="description" content="On The Loose is the outdoors club of the Claremont Colleges. Trips, leader training, and a trip guide for students at Pomona, CMC, Harvey Mudd, Pitzer, and Scripps.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -47,17 +47,8 @@
 
     <div class="ticker">
       <span class="ticker-label mono">on deck</span>
-      <div class="ticker-track">
-        <span class="ticker-item">🏔 <b>Baldy Snow Scramble</b> — Sat, meet at Frary 7am</span>
-        <span class="ticker-item">🧗 <b>Joshua Tree Anchor Clinic</b> — Fri–Sat, beginner friendly</span>
-        <span class="ticker-item">🚵 <b>Marshall Canyon Loop</b> — Sun, bikes provided</span>
-        <span class="ticker-item">⛺ <b>Sierra Overnight — San Jacinto</b> — next weekend, 6 spots left</span>
-        <span class="ticker-item">🥾 <b>Icehouse Canyon Day Hike</b> — Sat, 8 miles round trip</span>
-        <span class="ticker-item">🏔 <b>Baldy Snow Scramble</b> — Sat, meet at Frary 7am</span>
-        <span class="ticker-item">🧗 <b>Joshua Tree Anchor Clinic</b> — Fri–Sat, beginner friendly</span>
-        <span class="ticker-item">🚵 <b>Marshall Canyon Loop</b> — Sun, bikes provided</span>
-        <span class="ticker-item">⛺ <b>Sierra Overnight — San Jacinto</b> — next weekend, 6 spots left</span>
-        <span class="ticker-item">🥾 <b>Icehouse Canyon Day Hike</b> — Sat, 8 miles round trip</span>
+      <div class="ticker-track" id="ticker-track">
+        <span class="ticker-item">Loading trips…</span>
       </div>
     </div>
   </div>
@@ -75,11 +66,6 @@
         <span class="arrow mono">→ Trips</span>
         <h3>Weekend & day trips</h3>
         <p>Student-led hikes, climbs, rides, and overnights across the San Gabriels, the desert, and beyond — most weekends, all skill levels.</p>
-      </div>
-      <div class="signpost">
-        <span class="arrow mono">→ Gear room</span>
-        <h3>Equipment loans</h3>
-        <p>Tents, packs, stoves, and cold-weather gear, free to borrow for any registered 5C student — trip or no trip.</p>
       </div>
       <a class="signpost" href="past-trips.html#guide" style="text-decoration:none; color:inherit; display:block;">
         <span class="arrow mono">→ Guide</span>
@@ -102,7 +88,7 @@
       <h2>Happening soon</h2>
     </div>
     <div style="border:1.5px dashed var(--pine); background:var(--card); padding:26px 24px; font-size:15px; color:#4a443b; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
-      <span>No trips posted yet — check back soon, or see how to add one on the trips page.</span>
+      <span>See the full trip calendar, sign up, or post one of your own.</span>
       <a class="btn" style="background:var(--pine); border-color:var(--pine); padding:10px 20px;" href="upcoming-trips.html">View upcoming trips →</a>
     </div>
   </div>
@@ -146,5 +132,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth.js"></script>
+<script>
+  async function otlLoadTicker() {
+    const track = document.getElementById('ticker-track');
+    const { data: trips, error } = await sb.from('trips').select('*').order('created_at', { ascending: false });
+
+    if (error || !trips || trips.length === 0) {
+      track.innerHTML = '<a class="ticker-item" href="upcoming-trips.html">No trips posted yet — <b>be the first to post one →</b></a>';
+      return;
+    }
+
+    const { data: allSignups } = await sb.from('signups').select('trip_id');
+
+    function itemsHtml() {
+      return trips.map(function (trip) {
+        const count = (allSignups || []).filter(function (s) { return s.trip_id === trip.id; }).length;
+        let spots = '';
+        if (trip.capacity) {
+          const left = trip.capacity - count;
+          spots = left > 0 ? (left + ' spot' + (left === 1 ? '' : 's') + ' left') : 'full';
+        } else {
+          spots = count + ' signed up';
+        }
+        return '<a class="ticker-item" href="upcoming-trips.html#trip-' + trip.id + '">'
+          + '<b>' + trip.title + '</b> — ' + trip.trip_date + ' · ' + spots
+          + '</a>';
+      }).join('');
+    }
+
+    // duplicate the list once so the marquee scroll loops seamlessly
+    track.innerHTML = itemsHtml() + itemsHtml();
+  }
+
+  otlLoadTicker();
+</script>
 </body>
 </html>
