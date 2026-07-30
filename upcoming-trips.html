@@ -46,6 +46,12 @@
   .req-actions{ display:flex; gap:6px; }
   .req-actions button{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; border:1px solid var(--ink); background:var(--paper); padding:3px 8px; cursor:pointer; }
   .req-actions button:hover{ background:var(--rust); color:var(--paper); border-color:var(--rust); }
+  .del-trip-btn{
+    background:var(--paper); color:var(--rust); border:1.5px solid var(--rust);
+    padding:9px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase;
+    font-size:11px; letter-spacing:0.05em; cursor:pointer;
+  }
+  .del-trip-btn:hover{ background:var(--rust); color:var(--paper); }
 </style>
 </head>
 <body>
@@ -61,6 +67,7 @@
       <a href="about.html">About</a>
       <a href="past-trips.html">Past Trips</a>
       <a href="upcoming-trips.html" class="active">Upcoming Trips</a>
+      <a href="blog.html">Blog</a>
       <span id="auth-status"></span>
     </nav>
   </div>
@@ -156,6 +163,7 @@
   </div>
   <div class="footer-bottom">
     <span>© On The Loose, Outdoors Club of the Claremont Colleges.</span>
+    <a href="admin.html" class="mono" style="color:#6b6353; text-decoration:none;">Staff</a>
     <span>Site rebuilt from the club's original design.</span>
   </div>
 </footer>
@@ -167,12 +175,6 @@
   const postToggleWrap = document.getElementById('post-toggle-wrap');
   const postToggleBtn = document.getElementById('post-toggle-btn');
   const postFormWrap = document.getElementById('post-form-wrap');
-
-  async function otlIsLeader(user) {
-    if (!user) return false;
-    const { data } = await sb.from('profiles').select('is_leader').eq('id', user.id).single();
-    return !!(data && data.is_leader);
-  }
 
   // Only leaders see the "Post a trip" button at all
   (async function initPostButton() {
@@ -262,6 +264,47 @@
     `).join('');
   }
 
+  function editTripFormHtml(trip) {
+    return `
+      <form class="edit-trip-form" data-trip-id="${trip.id}">
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Trip name</label>
+            <input type="text" class="et-title" value="${trip.title.replace(/"/g, '&quot;')}" required>
+          </div>
+          <div class="pf-field">
+            <label>Destination</label>
+            <input type="text" class="et-destination" value="${trip.destination.replace(/"/g, '&quot;')}" required>
+          </div>
+        </div>
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Date / time</label>
+            <input type="text" class="et-date" value="${trip.trip_date.replace(/"/g, '&quot;')}" required>
+          </div>
+          <div class="pf-field">
+            <label>Difficulty</label>
+            <select class="et-difficulty">
+              <option value="1" ${trip.difficulty === 1 ? 'selected' : ''}>Easy</option>
+              <option value="2" ${trip.difficulty === 2 ? 'selected' : ''}>Moderate</option>
+              <option value="3" ${trip.difficulty === 3 ? 'selected' : ''}>Strenuous</option>
+            </select>
+          </div>
+        </div>
+        <div class="pf-field">
+          <label>Description</label>
+          <textarea class="et-blurb" required>${trip.blurb}</textarea>
+        </div>
+        <div class="pf-field" style="max-width:160px;">
+          <label>Capacity (optional)</label>
+          <input type="number" class="et-capacity" min="1" value="${trip.capacity || ''}">
+        </div>
+        <button class="signup-btn" type="submit" style="max-width:160px; display:inline-block;">Save changes</button>
+        <button type="button" class="del-trip-btn" data-trip-id="${trip.id}" style="max-width:160px; margin-left:8px;">Delete trip</button>
+      </form>
+    `;
+  }
+
   async function loadTrips() {
     const container = document.getElementById('trips-container');
     const user = await otlCurrentUser();
@@ -306,7 +349,9 @@
 
           ${isMyTrip
             ? `<button class="manage-toggle" data-toggle-id="${trip.id}">Manage requests (${tripSignups.length})</button>
-               <div class="manage-panel" id="manage-${trip.id}">${manageRequestsHtml(trip, tripSignups)}</div>`
+               <div class="manage-panel" id="manage-${trip.id}">${manageRequestsHtml(trip, tripSignups)}</div>
+               <button class="manage-toggle" data-edit-toggle-id="${trip.id}">Edit trip</button>
+               <div class="manage-panel" id="edit-${trip.id}">${editTripFormHtml(trip)}</div>`
             : requestButtonHtml(trip, mySignup)
           }
         </article>
@@ -345,9 +390,47 @@
     });
 
     // Manage-requests panel toggles (leader only, own trips)
-    document.querySelectorAll('.manage-toggle').forEach(btn => {
+    document.querySelectorAll('.manage-toggle[data-toggle-id]').forEach(btn => {
       btn.addEventListener('click', function () {
         document.getElementById('manage-' + this.dataset.toggleId).classList.toggle('show');
+      });
+    });
+
+    // Edit-trip panel toggles (leader only, own trips)
+    document.querySelectorAll('.manage-toggle[data-edit-toggle-id]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.getElementById('edit-' + this.dataset.editToggleId).classList.toggle('show');
+      });
+    });
+
+    // Save edited trip details
+    document.querySelectorAll('.edit-trip-form').forEach(form => {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const tripId = this.dataset.tripId;
+        const capacityVal = this.querySelector('.et-capacity').value;
+
+        const { error } = await sb.from('trips').update({
+          title: this.querySelector('.et-title').value,
+          destination: this.querySelector('.et-destination').value,
+          trip_date: this.querySelector('.et-date').value,
+          difficulty: parseInt(this.querySelector('.et-difficulty').value, 10),
+          blurb: this.querySelector('.et-blurb').value,
+          capacity: capacityVal ? parseInt(capacityVal, 10) : null
+        }).eq('id', tripId);
+
+        if (error) { alert(error.message); return; }
+        loadTrips();
+      });
+    });
+
+    // Delete trip
+    document.querySelectorAll('.del-trip-btn').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        if (!confirm('Delete this trip? This also removes everyone\'s requests for it.')) return;
+        const { error } = await sb.from('trips').delete().eq('id', this.dataset.tripId);
+        if (error) { alert(error.message); return; }
+        loadTrips();
       });
     });
 
