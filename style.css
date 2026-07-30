@@ -75,11 +75,10 @@ header{
   text-decoration:none;
   color: var(--ink);
 }
-.brand .blaze{
-  width: 16px; height: 22px;
-  background: var(--rust);
-  clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0 100%, 0 30%);
+.brand-logo{
+  width: 34px; height: 34px;
   flex-shrink:0;
+  border-radius: 50%;
 }
 .brand-text{
   font-family:'Bebas Neue', sans-serif;
@@ -136,6 +135,13 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   letter-spacing: 0.18em;
   color: var(--rust);
   margin-bottom: 18px;
+}
+.hero-logo{
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 22px;
+  display: block;
+  filter: drop-shadow(2px 4px 0 rgba(43,38,32,0.2));
 }
 .hero h1{
   font-size: clamp(56px, 11vw, 128px);
