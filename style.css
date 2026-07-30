@@ -104,6 +104,17 @@ nav.links a{
 }
 nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--rust); }
 
+.nav-toggle-checkbox{ display:none; }
+.nav-toggle-label{
+  display:none;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 4px 6px;
+  user-select: none;
+}
+
 /* --- hero (home, large) --- */
 .hero{
   position: relative;
@@ -404,6 +415,25 @@ nav.links a:hover, nav.links a.active{ border-color: var(--rust); color: var(--r
   border-color: var(--rust);
 }
 
+/* --- featured blog post (home page) --- */
+.featured-post-card{
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  padding: 28px 30px;
+  box-shadow: 4px 6px 0 var(--shadow);
+}
+.featured-post-card h3{ font-size: 30px; margin: 0 0 6px; }
+.featured-post-card .fp-meta{
+  font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--sky);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; display:block;
+}
+.featured-post-card .fp-snippet{ color:#4a443b; margin-bottom: 16px; }
+.featured-post-card .fp-link{
+  font-family:'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--rust); text-decoration:none;
+}
+.featured-post-card .fp-link:hover{ text-decoration:underline; }
+
 /* --- guide map --- */
 #guide-map{
   height: 480px;
@@ -641,7 +671,19 @@ footer{
 }
 
 @media (max-width: 720px){
-  nav.links{ display:none; }
+  .nav-inner{ flex-wrap: wrap; }
+  .nav-toggle-label{ display:block; }
+  nav.links{
+    display:none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0 6px;
+    border-top: 1.5px solid var(--paper-dark);
+    margin-top: 12px;
+  }
+  .nav-toggle-checkbox:checked ~ nav.links{ display:flex; }
   .section{ padding: 56px 18px; }
   .corkboard{ padding: 34px 18px; }
 }

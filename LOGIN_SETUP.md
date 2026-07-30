@@ -54,7 +54,46 @@ Wait about a minute for GitHub Pages to redeploy, then test it:
 ## Free tier limits (plenty for a club)
 Supabase's free tier includes 500 MB of database storage, 50,000 monthly active users, and unlimited API requests — far beyond what a college club needs. If the club ever outgrows it, upgrading is a few dollars a month, not a rebuild.
 
-## Optional next steps
-- **Google sign-in** instead of / alongside email+password: Authentication → Providers → Google, needs a Google OAuth client (a bit more setup, happy to walk through it if you want it).
-- **Edit/delete your own posted trip**: not built yet — currently leaders would email the club to have a trip corrected. Easy to add if you want it.
-- **Email confirmations for new signups on a trip**: Supabase can trigger emails via its Edge Functions, but that's a bigger lift than this initial version.
+## 7. Making someone a leader (this is the new part)
+
+Trip posting is now restricted to "leaders" — a flag you control, off by default for every new account. To promote someone:
+
+1. In Supabase, go to **Table Editor** (left sidebar) → **profiles** table.
+2. Find their row (search by name or email).
+3. Click the `is_leader` cell for that row and change it from `false` to `true`.
+4. That's it — no code, no redeploy. They'll see the "+ Post a trip" button next time they load the page.
+
+To remove leader access, do the same thing in reverse.
+
+### Migration note
+If you already ran the original `schema.sql`, don't run it again — instead run **`migration.sql`** (included in this download) once in the SQL Editor. It adds the `is_leader` flag and the request/confirm workflow without touching your existing trips or accounts.
+
+## How the new sign-up flow works
+- The general public can **request** a spot on any trip — this doesn't guarantee them in.
+- Only the trip's leader can **confirm** or **decline** each request, from a "Manage requests" panel that appears on trips they posted.
+- The trip card shows confirmed count (and capacity, if set) publicly, plus a pending-request count.
+- A person can cancel their own request or confirmed spot at any time.
+
+## 8. Admin access & the blog (newest addition)
+
+Run **`migration2.sql`** once in the SQL Editor (after `schema.sql` and `migration.sql`). It adds:
+- An `is_admin` flag on profiles, off by default for everyone
+- A security fix so nobody (not even a clever user) can grant themselves leader or admin status directly through the database — only an existing admin can change those flags
+- The `blog_posts` table, with posting/editing/deleting restricted to admins
+
+### Bootstrapping your first admin
+Since admins are the only ones who can promote people, you need to manually make yourself the first one:
+1. Create your own account on the site (`account.html`) if you haven't already, and log in at least once.
+2. In Supabase → **Table Editor → profiles**, find your row, and set `is_admin` to `true` directly (same way you'd promote a leader).
+3. From then on, log into **`admin.html`** on the site and you can promote/demote leaders *and* admins for everyone else — no more manual database edits needed.
+
+### What admins can do (`admin.html`)
+- Toggle **Leader** and **Admin** status for any member, from a simple table.
+- Write and publish blog posts (title + body — leave a blank line between paragraphs for new paragraphs).
+- Delete any blog post.
+
+### The blog
+- **`blog.html`** — public page listing every post, newest first.
+- The **home page** automatically features the single most recent post, with a "Read the full post" link.
+- Posts are visible to everyone, logged in or not — only posting/editing is restricted.
+
